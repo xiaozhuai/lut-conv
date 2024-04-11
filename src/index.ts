@@ -194,6 +194,9 @@ export class LutConv {
     }
 
     public static saveCubeStr(lut: LutData, headers: string = ''): string {
+        if (lut.width !== lut.height || lut.width !== lut.depth) {
+            throw new Error("Invalid lut size");
+        }
         let cubeStr = `${headers.trim()}\nLUT_3D_SIZE ${lut.width}\n\n`;
         for (let z = 0; z < lut.depth; z++) {
             for (let y = 0; y < lut.height; y++) {
