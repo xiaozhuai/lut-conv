@@ -1,0 +1,43 @@
+{
+    "name": "lut-conv",
+    "version": "1.0.0",
+    "description": "A js library for converting and resizing lookup table (lut), supporting png and cube formats",
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./dist/index.js",
+            "import": "./dist/index.mjs",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": [
+        "dist",
+        "src"
+    ],
+    "scripts": {
+        "build": "tsup && cp dist/index.global.js web/js/lut-conv.global.js",
+        "prepublishOnly": "npm run build",
+        "test": "npm run build && node tests/main.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/xiaozhuai/lut-conv.git"
+    },
+    "keywords": [
+        "lut",
+        "cube"
+    ],
+    "author": "xiaozhuai",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/xiaozhuai/lut-conv/issues"
+    },
+    "homepage": "https://github.com/xiaozhuai/lut-conv#readme",
+    "devDependencies": {
+        "canvas": "^2.11.2",
+        "tsup": "^8.0.2",
+        "typescript": "^5.4.5"
+    }
+}
