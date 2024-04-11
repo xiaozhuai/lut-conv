@@ -1,6 +1,6 @@
 {
     "name": "lut-conv",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A js library for converting and resizing lookup table (lut), supporting image and cube formats",
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
