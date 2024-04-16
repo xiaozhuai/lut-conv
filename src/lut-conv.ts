@@ -89,8 +89,8 @@ export class LutData {
         const fy = g * this.height - 0.5;
         const fz = b * this.depth - 0.5;
         const x = clamp(Math.round(fx), 0, this.width - 1);
-        const y = clamp(Math.round(fy), 0, this.width - 1);
-        const z = clamp(Math.round(fz), 0, this.width - 1);
+        const y = clamp(Math.round(fy), 0, this.height - 1);
+        const z = clamp(Math.round(fz), 0, this.depth - 1);
         return this.get(x, y, z);
     }
 
