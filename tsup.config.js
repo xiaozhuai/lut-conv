@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-    entry: ["src/index.ts"],
+    entry: ["src/lut-conv.ts"],
     format: ["cjs", "esm", "iife"],
     minify: true,
     dts: true,
