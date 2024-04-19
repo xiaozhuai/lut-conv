@@ -78,7 +78,7 @@ const lutImageInfo = {
 const canvas = createCanvas(imageWidth, imageHeight);
 const ctx = canvas.getContext('2d');
 const imageData = LutConv.saveLutImageData(lut, lutImageInfo);
-ctx.putImageData(createImageData(imageData, imageWidth, imageHeight), 0, 0);
+ctx.putImageData(ctx.createImageData(imageData, imageWidth, imageHeight), 0, 0);
 // Now you can get the image from the canvas
 ```
 
