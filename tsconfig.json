@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "outDir": "dist",
+        "rootDir": "src"
+    },
+    "include": [
+        "src/lut-conv.ts"
+    ]
+}
