@@ -1,5 +1,5 @@
 type LutConvFilterMode = 'nearest' | 'linear';
-export declare class LutData {
+declare class LutData {
     width: number;
     height: number;
     depth: number;
@@ -58,10 +58,11 @@ interface LutConvImageInfo {
     height: number;
     depth: number;
 }
-export declare class LutConv {
+declare class LutConv {
     static loadCubeStr(cubeStr: string): LutData;
     static saveCubeStr(lut: LutData, headers?: string): string;
     static loadLutImageData(imageData: Uint8ClampedArray, lutImageInfo: LutConvImageInfo): LutData;
     static saveLutImageData(lut: LutData, lutImageInfo: LutConvImageInfo): Uint8ClampedArray;
 }
-export {};
+
+export { LutConv, LutData };
