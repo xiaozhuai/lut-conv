@@ -1,4 +1,4 @@
-import { defineConfig } from "tsup";
+import {defineConfig} from "tsdown";
 
 export default defineConfig({
     entry: ["src/lut-conv.ts"],
@@ -8,5 +8,6 @@ export default defineConfig({
     sourcemap: true,
     splitting: false,
     clean: true,
-    globalName: "LutConv"
+    globalName: "LutConv",
+    target: false,
 });

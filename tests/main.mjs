@@ -1,7 +1,9 @@
-const {LutConv} = require('../.');
-const fsp = require('fs').promises;
-const pth = require('path');
-const {loadImage, createCanvas} = require('@napi-rs/canvas');
+import fsp from 'node:fs/promises';
+import pth from 'node:path';
+import {loadImage, createCanvas} from '@napi-rs/canvas';
+import {LutConv} from "../dist/lut-conv.mjs";
+
+const __dirname = pth.dirname(new URL(import.meta.url).pathname);
 
 const LutUtils = {
     async readCube(file) {

@@ -67,4 +67,4 @@ declare class LutConv {
 }
 //#endregion
 export { LutConv, LutData };
-//# sourceMappingURL=lut-conv.d.mts.map
+//# sourceMappingURL=lut-conv.d.cts.map

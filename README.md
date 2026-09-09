@@ -8,13 +8,13 @@ A js library for converting and resizing lookup table (lut), supporting image an
 
 ## Usage
 
-### ES6
+### ESM
 
 ```js
 import { LutConv } from 'lut-conv';
 ```
 
-### CommonJS
+### CJS
 
 ```js
 const { LutConv } = require('lut-conv');
@@ -23,7 +23,7 @@ const { LutConv } = require('lut-conv');
 ### Browser
 
 ```html
-<script type="text/javascript" src="lut-conv.global.js"></script>
+<script type="text/javascript" src="lut-conv.iife.js"></script>
 ```
 
 ## Load cube
