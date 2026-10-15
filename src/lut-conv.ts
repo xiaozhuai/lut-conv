@@ -85,9 +85,9 @@ export class LutData {
      * @param b Range [0, 1]
      */
     lookupNearest(r: number, g: number, b: number): Float32Array {
-        const fx = r * this.width - 0.5;
-        const fy = g * this.height - 0.5;
-        const fz = b * this.depth - 0.5;
+        const fx = clamp(r, 0, 1) * (this.width - 1);
+        const fy = clamp(g, 0, 1) * (this.height - 1);
+        const fz = clamp(b, 0, 1) * (this.depth - 1);
         const x = clamp(Math.round(fx), 0, this.width - 1);
         const y = clamp(Math.round(fy), 0, this.height - 1);
         const z = clamp(Math.round(fz), 0, this.depth - 1);
@@ -101,9 +101,9 @@ export class LutData {
      * @param b Range [0, 1]
      */
     lookupLinear(r: number, g: number, b: number): Float32Array {
-        const fx = clamp(r * this.width - 0.5, 0, this.width - 1);
-        const fy = clamp(g * this.height - 0.5, 0, this.height - 1);
-        const fz = clamp(b * this.depth - 0.5, 0, this.depth - 1);
+        const fx = clamp(r, 0, 1) * (this.width - 1);
+        const fy = clamp(g, 0, 1) * (this.height - 1);
+        const fz = clamp(b, 0, 1) * (this.depth - 1);
 
         const x0 = clamp(Math.floor(fx), 0, this.width - 1);
         const y0 = clamp(Math.floor(fy), 0, this.height - 1);
@@ -145,9 +145,9 @@ export class LutData {
         for (let z = 0; z < depth; z++) {
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
-                    let r = (x + 0.5) / width;
-                    let g = (y + 0.5) / height;
-                    let b = (z + 0.5) / depth;
+                    let r = width === 1 ? 0 : x / (width - 1);
+                    let g = height === 1 ? 0 : y / (height - 1);
+                    let b = depth === 1 ? 0 : z / (depth - 1);
                     newLut.set(x, y, z, this.lookup(r, g, b, mode));
                 }
             }
