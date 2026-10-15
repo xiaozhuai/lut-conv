@@ -16,6 +16,17 @@ function isSafeInteger(value: number): boolean {
     return isFiniteNumber(value) && Math.floor(value) === value && Math.abs(value) <= 9007199254740991;
 }
 
+function hasThreeFiniteComponents(value: Float32Array): boolean {
+    return value.length >= 3 &&
+        isFiniteNumber(value[0]) && isFiniteNumber(value[1]) && isFiniteNumber(value[2]);
+}
+
+function validateLookupCoordinates(r: number, g: number, b: number): void {
+    if (![r, g, b].every(isFiniteNumber)) {
+        throw new Error("LUT lookup coordinates must be finite numbers");
+    }
+}
+
 function getLutDataLength(width: number, height: number, depth: number): number {
     if (![width, height, depth].every(value => isSafeInteger(value) && value > 0)) {
         throw new Error("LUT dimensions must be positive integers");
@@ -66,6 +77,11 @@ export class LutData {
             if (data.length !== dataLength) {
                 throw new Error("Invalid data length");
             }
+            for (let i = 0; i < data.length; i++) {
+                if (!isFiniteNumber(data[i])) {
+                    throw new Error("LUT data must contain only finite numbers");
+                }
+            }
             this.data = data;
         }
     }
@@ -91,6 +107,9 @@ export class LutData {
     set(x: number, y: number, z: number, value: Float32Array): void {
         if (value.length < 3) {
             throw new Error("LUT value must contain three components");
+        }
+        if (!hasThreeFiniteComponents(value)) {
+            throw new Error("LUT value must contain only finite numbers");
         }
         const i = getLutDataIndex(x, y, z, this.width, this.height, this.depth);
         this.data[i] = value[0];
@@ -123,6 +142,7 @@ export class LutData {
      * @param b Range [0, 1]
      */
     lookupNearest(r: number, g: number, b: number): Float32Array {
+        validateLookupCoordinates(r, g, b);
         const fx = clamp(r, 0, 1) * (this.width - 1);
         const fy = clamp(g, 0, 1) * (this.height - 1);
         const fz = clamp(b, 0, 1) * (this.depth - 1);
@@ -139,6 +159,7 @@ export class LutData {
      * @param b Range [0, 1]
      */
     lookupLinear(r: number, g: number, b: number): Float32Array {
+        validateLookupCoordinates(r, g, b);
         const fx = clamp(r, 0, 1) * (this.width - 1);
         const fy = clamp(g, 0, 1) * (this.height - 1);
         const fz = clamp(b, 0, 1) * (this.depth - 1);
@@ -302,6 +323,9 @@ export class LutConv {
             for (let y = 0; y < lut.height; y++) {
                 for (let x = 0; x < lut.width; x++) {
                     let v = lut.get(x, y, z);
+                    if (!hasThreeFiniteComponents(v)) {
+                        throw new Error("LUT data must contain only finite numbers");
+                    }
                     cubeStr += `${v[0].toFixed(6)} ${v[1].toFixed(6)} ${v[2].toFixed(6)}\n`;
                 }
             }
@@ -354,6 +378,9 @@ export class LutConv {
                     const py = y + gy * height;
                     const i = (py * imageWidth + px) * 4;
                     const v = lut.get(x, y, z);
+                    if (!hasThreeFiniteComponents(v)) {
+                        throw new Error("LUT data must contain only finite numbers");
+                    }
                     imageData[i] = clamp(Math.round(v[0] * 255), 0, 255);
                     imageData[i + 1] = clamp(Math.round(v[1] * 255), 0, 255);
                     imageData[i + 2] = clamp(Math.round(v[2] * 255), 0, 255);

@@ -58,6 +58,42 @@ test('LUT construction and resizing require valid dimensions', () => {
     assert.throws(() => lut.resize(1.5, 1, 1, 'linear'), /LUT dimensions must be positive integers/);
 });
 
+test('LUT APIs reject non-finite coordinates and channel values', () => {
+    assert.throws(
+        () => new LutData(1, 1, 1, new Float32Array([NaN, 0, 0])),
+        /LUT data must contain only finite numbers/,
+    );
+
+    const lut = new LutData(1, 1, 1);
+    assert.throws(
+        () => lut.set(0, 0, 0, new Float32Array([0, Infinity, 0])),
+        /LUT value must contain only finite numbers/,
+    );
+    for (const coordinate of [NaN, Infinity, -Infinity]) {
+        assert.throws(
+            () => lut.lookupLinear(coordinate, 0, 0),
+            /LUT lookup coordinates must be finite numbers/,
+        );
+        assert.throws(
+            () => lut.lookupNearest(0, coordinate, 0),
+            /LUT lookup coordinates must be finite numbers/,
+        );
+    }
+
+    lut.data[0] = NaN;
+    assert.throws(() => LutConv.saveCubeStr(lut), /LUT data must contain only finite numbers/);
+    assert.throws(
+        () => LutConv.saveLutImageData(lut, {
+            imageWidth: 1,
+            imageHeight: 1,
+            width: 1,
+            height: 1,
+            depth: 1,
+        }),
+        /LUT data must contain only finite numbers/,
+    );
+});
+
 test('linear lookup clamps coordinates to the LUT boundary', () => {
     const lut = createIdentityLut(2);
 
