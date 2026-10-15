@@ -25,7 +25,7 @@
     "scripts": {
         "build": "tsdown && cp dist/lut-conv.mjs web/js/lut-conv.mjs && cp dist/lut-conv.mjs.map web/js/lut-conv.mjs.map",
         "prepublishOnly": "npm run build",
-        "test": "npm run build && node tests/main.mjs"
+        "test": "npm run build && node --test tests/*.test.mjs && node tests/main.mjs"
     },
     "repository": {
         "type": "git",

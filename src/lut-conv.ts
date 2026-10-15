@@ -101,9 +101,9 @@ export class LutData {
      * @param b Range [0, 1]
      */
     lookupLinear(r: number, g: number, b: number): Float32Array {
-        const fx = r * this.width - 0.5;
-        const fy = g * this.height - 0.5;
-        const fz = b * this.depth - 0.5;
+        const fx = clamp(r * this.width - 0.5, 0, this.width - 1);
+        const fy = clamp(g * this.height - 0.5, 0, this.height - 1);
+        const fz = clamp(b * this.depth - 0.5, 0, this.depth - 1);
 
         const x0 = clamp(Math.floor(fx), 0, this.width - 1);
         const y0 = clamp(Math.floor(fy), 0, this.height - 1);
