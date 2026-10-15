@@ -44,6 +44,20 @@ test('LUT accessors reject invalid coordinates and incomplete values', () => {
     );
 });
 
+test('LUT construction and resizing require valid dimensions', () => {
+    for (const dimensions of [[0, 1, 1], [-1, 1, 1], [1.5, 1, 1], [NaN, 1, 1]]) {
+        assert.throws(() => new LutData(...dimensions), /LUT dimensions must be positive integers/);
+    }
+    assert.throws(
+        () => new LutData(9007199254740991, 1, 1),
+        /LUT size is too large/,
+    );
+
+    const lut = new LutData(1, 1, 1);
+    assert.throws(() => lut.resize(0, 1, 1, 'linear'), /LUT dimensions must be positive integers/);
+    assert.throws(() => lut.resize(1.5, 1, 1, 'linear'), /LUT dimensions must be positive integers/);
+});
+
 test('linear lookup clamps coordinates to the LUT boundary', () => {
     const lut = createIdentityLut(2);
 

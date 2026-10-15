@@ -16,6 +16,17 @@ function isSafeInteger(value: number): boolean {
     return isFiniteNumber(value) && Math.floor(value) === value && Math.abs(value) <= 9007199254740991;
 }
 
+function getLutDataLength(width: number, height: number, depth: number): number {
+    if (![width, height, depth].every(value => isSafeInteger(value) && value > 0)) {
+        throw new Error("LUT dimensions must be positive integers");
+    }
+    const dataLength = width * height * depth * 3;
+    if (!isSafeInteger(dataLength)) {
+        throw new Error("LUT size is too large");
+    }
+    return dataLength;
+}
+
 function getLutDataIndex(
     x: number,
     y: number,
@@ -45,13 +56,14 @@ export class LutData {
      * @param data Initial data, null means create a new data array
      */
     constructor(width: number, height: number, depth: number, data: Float32Array | null = null) {
+        const dataLength = getLutDataLength(width, height, depth);
         this.width = width;
         this.height = height;
         this.depth = depth;
         if (data === null) {
-            this.data = new Float32Array(width * height * depth * 3);
+            this.data = new Float32Array(dataLength);
         } else {
-            if (data.length !== width * height * depth * 3) {
+            if (data.length !== dataLength) {
                 throw new Error("Invalid data length");
             }
             this.data = data;
