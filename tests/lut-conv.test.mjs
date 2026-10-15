@@ -98,6 +98,26 @@ test('cube parser rejects a file without data instead of scanning forever', () =
     );
 });
 
+test('cube parser rejects invalid content before the first data row', () => {
+    assert.throws(
+        () => LutConv.loadCubeStr('LUT_3D_SIZE 1\nnot valid data\n0 0 0\n'),
+        /Invalid cube data at line 2/,
+    );
+});
+
+test('cube parser accepts recognized metadata after the size row', () => {
+    const cube = [
+        'LUT_3D_SIZE 1',
+        'TITLE \"Identity\"',
+        'DOMAIN_MIN 0 0 0',
+        'DOMAIN_MAX 1 1 1',
+        'LUT_3D_INPUT_RANGE 0 1',
+        '0 0 0',
+    ].join('\n');
+
+    assertVectorClose(LutConv.loadCubeStr(cube).data, [0, 0, 0]);
+});
+
 test('cube parser requires exactly size cubed data rows', () => {
     assert.throws(
         () => LutConv.loadCubeStr('LUT_3D_SIZE 2\n0 0 0\n'),

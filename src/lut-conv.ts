@@ -223,42 +223,60 @@ function getLutImageGrid(lutImageInfo: LutConvImageInfo): {gWidth: number; gHeig
 export class LutConv {
     public static loadCubeStr(cubeStr: string): LutData {
         const NUMBER_PATTERN = '[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[Ee][+-]?\\d+)?';
-        const REGEX_SIZE = /^\s*LUT_3D_SIZE\s+(\d+)\s*$/m;
+        const REGEX_SIZE = /^\s*LUT_3D_SIZE\s+(\d+)\s*$/;
         const REGEX_VALUE = new RegExp(
             '^\\s*(' + NUMBER_PATTERN + ')\\s+(' + NUMBER_PATTERN + ')\\s+(' + NUMBER_PATTERN + ')\\s*$'
         );
+        const REGEX_METADATA = new RegExp(
+            '^\\s*(?:' +
+            'TITLE\\s+\".*\"|' +
+            'DOMAIN_(?:MIN|MAX)\\s+' + NUMBER_PATTERN + '\\s+' + NUMBER_PATTERN + '\\s+' + NUMBER_PATTERN + '|' +
+            'LUT_3D_INPUT_RANGE\\s+' + NUMBER_PATTERN + '\\s+' + NUMBER_PATTERN +
+            ')\\s*$'
+        );
 
-        const resultSize = REGEX_SIZE.exec(cubeStr);
-        if (!resultSize || resultSize.length < 2) {
+        const lines = cubeStr.replace(/\r/g, '').split('\n');
+        let size = 0;
+        let sizeLineIndex = -1;
+        for (let i = 0; i < lines.length; i++) {
+            const resultSize = REGEX_SIZE.exec(lines[i]);
+            if (resultSize) {
+                size = parseInt(resultSize[1], 10);
+                sizeLineIndex = i;
+                break;
+            }
+        }
+        if (sizeLineIndex < 0) {
             throw new Error("Error parsing cube");
         }
-        const size = parseInt(resultSize[1]);
-        const lines = cubeStr.replace(/\r/g, '').split('\n');
-        let index = 0;
-        while (index < lines.length && !REGEX_VALUE.test(lines[index])) {
-            index++;
+
+        const values: number[][] = [];
+        let dataStarted = false;
+        for (let i = sizeLineIndex + 1; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmedLine = line.trim();
+            if (trimmedLine === '' || trimmedLine.charAt(0) === '#') {
+                continue;
+            }
+            if (!dataStarted && REGEX_METADATA.test(line)) {
+                continue;
+            }
+
+            dataStarted = true;
+            const result = REGEX_VALUE.exec(line);
+            if (!result) {
+                throw new Error("Invalid cube data at line " + (i + 1));
+            }
+            const value = [Number(result[1]), Number(result[2]), Number(result[3])];
+            if (!value.every(isFiniteNumber)) {
+                throw new Error("Invalid cube data at line " + (i + 1));
+            }
+            values.push(value);
         }
-        if (index === lines.length) {
+        if (!dataStarted) {
             throw new Error("Error parsing cube data");
         }
 
-        const values = lines.slice(index)
-            .map((line, offset) => ({line, lineNumber: index + offset + 1}))
-            .filter(({line}) => {
-                const trimmedLine = line.trim();
-                return trimmedLine !== '' && trimmedLine.charAt(0) !== '#';
-            })
-            .map(({line, lineNumber}) => {
-                const result = REGEX_VALUE.exec(line);
-                if (!result) {
-                    throw new Error("Invalid cube data at line " + lineNumber);
-                }
-                const value = [Number(result[1]), Number(result[2]), Number(result[3])];
-                if (!value.every(isFiniteNumber)) {
-                    throw new Error("Invalid cube data at line " + lineNumber);
-                }
-                return value;
-            });
         const expectedValueCount = size * size * size;
         if (values.length !== expectedValueCount) {
             throw new Error(
