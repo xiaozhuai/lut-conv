@@ -358,9 +358,9 @@ const App = {
             await wait(50);
 
             try {
-                const width = Number.parseInt(outputLutInfo.width, 10);
-                const height = Number.parseInt(outputLutInfo.height, 10);
-                const depth = Number.parseInt(outputLutInfo.depth, 10);
+                const width = Number(outputLutInfo.width);
+                const height = Number(outputLutInfo.height);
+                const depth = Number(outputLutInfo.depth);
 
                 if (![width, height, depth].every(Number.isSafeInteger) ||
                     width <= 0 || height <= 0 || depth <= 0) {
