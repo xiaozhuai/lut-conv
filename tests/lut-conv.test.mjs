@@ -67,3 +67,42 @@ test('cube parser rejects a file without data instead of scanning forever', () =
         /Error parsing cube data/,
     );
 });
+
+test('cube parser requires exactly size cubed data rows', () => {
+    assert.throws(
+        () => LutConv.loadCubeStr('LUT_3D_SIZE 2\n0 0 0\n'),
+        /Invalid cube data length: expected 8, got 1/,
+    );
+    assert.throws(
+        () => LutConv.loadCubeStr('LUT_3D_SIZE 1\n0 0 0\n1 1 1\n'),
+        /Invalid cube data length: expected 1, got 2/,
+    );
+});
+
+test('cube parser rejects an invalid row instead of producing NaN', () => {
+    const rows = [
+        '0 0 0',
+        '1 0 0',
+        'invalid data',
+        '1 1 0',
+        '0 0 1',
+        '1 0 1',
+        '0 1 1',
+        '1 1 1',
+    ];
+
+    assert.throws(
+        () => LutConv.loadCubeStr('LUT_3D_SIZE 2\n' + rows.join('\n') + '\n'),
+        /Invalid cube data at line 4/,
+    );
+    assert.throws(
+        () => LutConv.loadCubeStr('LUT_3D_SIZE 1\n1e999 0 0\n'),
+        /Invalid cube data at line 2/,
+    );
+});
+
+test('cube parser ignores blank and comment lines between values', () => {
+    const lut = LutConv.loadCubeStr('LUT_3D_SIZE 1\n\n# sample\n0 0 0\n');
+
+    assertVectorClose(lut.data, [0, 0, 0]);
+});

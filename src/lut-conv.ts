@@ -167,8 +167,11 @@ interface LutConvImageInfo {
 
 export class LutConv {
     public static loadCubeStr(cubeStr: string): LutData {
+        const NUMBER_PATTERN = '[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[Ee][+-]?\\d+)?';
         const REGEX_SIZE = /^\s*LUT_3D_SIZE\s+(\d+)\s*$/m;
-        const REGEX_VALUE = /^\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\s+[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\s+[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\s*$/;
+        const REGEX_VALUE = new RegExp(
+            '^\\s*(' + NUMBER_PATTERN + ')\\s+(' + NUMBER_PATTERN + ')\\s+(' + NUMBER_PATTERN + ')\\s*$'
+        );
 
         const resultSize = REGEX_SIZE.exec(cubeStr);
         if (!resultSize || resultSize.length < 2) {
@@ -183,15 +186,33 @@ export class LutConv {
         if (index === lines.length) {
             throw new Error("Error parsing cube data");
         }
-        lines.splice(0, index);
-        lines.splice(size * size * size);
 
-        let data = new Float32Array(size * size * size * 3);
-        lines.forEach((line, i) => {
-            let v = line.trim().split(/\s+/).map(parseFloat);
-            data[i * 3] = v[0];
-            data[i * 3 + 1] = v[1];
-            data[i * 3 + 2] = v[2];
+        const values = lines.slice(index)
+            .map((line, offset) => ({line, lineNumber: index + offset + 1}))
+            .filter(({line}) => line.trim() !== '' && !line.trimStart().startsWith('#'))
+            .map(({line, lineNumber}) => {
+                const result = REGEX_VALUE.exec(line);
+                if (!result) {
+                    throw new Error("Invalid cube data at line " + lineNumber);
+                }
+                const value = [Number(result[1]), Number(result[2]), Number(result[3])];
+                if (!value.every(Number.isFinite)) {
+                    throw new Error("Invalid cube data at line " + lineNumber);
+                }
+                return value;
+            });
+        const expectedValueCount = size * size * size;
+        if (values.length !== expectedValueCount) {
+            throw new Error(
+                "Invalid cube data length: expected " + expectedValueCount + ", got " + values.length
+            );
+        }
+
+        let data = new Float32Array(expectedValueCount * 3);
+        values.forEach((value, i) => {
+            data[i * 3] = value[0];
+            data[i * 3 + 1] = value[1];
+            data[i * 3 + 2] = value[2];
         });
         return new LutData(size, size, size, data);
     }
