@@ -66,5 +66,5 @@ declare class LutConv {
   static saveLutImageData(lut: LutData, lutImageInfo: LutConvImageInfo): Uint8ClampedArray;
 }
 //#endregion
-export { LutConv, LutData };
+export { LutConv, LutConvFilterMode, LutConvImageInfo, LutData };
 //# sourceMappingURL=lut-conv.d.cts.map

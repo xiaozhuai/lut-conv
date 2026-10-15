@@ -1,4 +1,4 @@
-type LutConvFilterMode = 'nearest' | 'linear';
+export type LutConvFilterMode = 'nearest' | 'linear';
 
 function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, value));
@@ -215,7 +215,7 @@ export class LutData {
     }
 }
 
-interface LutConvImageInfo {
+export interface LutConvImageInfo {
     imageWidth: number;
     imageHeight: number;
 

@@ -25,7 +25,7 @@
     "scripts": {
         "build": "tsdown && cp dist/lut-conv.mjs web/js/lut-conv.mjs && cp dist/lut-conv.mjs.map web/js/lut-conv.mjs.map",
         "prepublishOnly": "npm run build",
-        "typecheck": "tsc --noEmit --target es5 src/lut-conv.ts",
+        "typecheck": "tsc --noEmit --target es5 src/lut-conv.ts tests/public-types.test.ts",
         "test": "npm run typecheck && npm run build && node --test tests/*.test.mjs && node tests/main.mjs"
     },
     "repository": {
