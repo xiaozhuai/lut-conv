@@ -167,8 +167,8 @@ interface LutConvImageInfo {
 
 export class LutConv {
     public static loadCubeStr(cubeStr: string): LutData {
-        const REGEX_SIZE = /^LUT_3D_SIZE (\d+)$/m;
-        const REGEX_VALUE = /^([\d\\.Ee-]+) ([\d\\.Ee-]+) ([\d\\.Ee-]+)$/;
+        const REGEX_SIZE = /^\s*LUT_3D_SIZE\s+(\d+)\s*$/m;
+        const REGEX_VALUE = /^\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\s+[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\s+[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\s*$/;
 
         const resultSize = REGEX_SIZE.exec(cubeStr);
         if (!resultSize || resultSize.length < 2) {
@@ -177,15 +177,18 @@ export class LutConv {
         const size = parseInt(resultSize[1]);
         const lines = cubeStr.replace(/\r/g, '').split('\n');
         let index = 0;
-        while (!REGEX_VALUE.test(lines[index])) {
+        while (index < lines.length && !REGEX_VALUE.test(lines[index])) {
             index++;
+        }
+        if (index === lines.length) {
+            throw new Error("Error parsing cube data");
         }
         lines.splice(0, index);
         lines.splice(size * size * size);
 
         let data = new Float32Array(size * size * size * 3);
         lines.forEach((line, i) => {
-            let v = line.split(' ').map(parseFloat);
+            let v = line.trim().split(/\s+/).map(parseFloat);
             data[i * 3] = v[0];
             data[i * 3 + 1] = v[1];
             data[i * 3 + 2] = v[2];

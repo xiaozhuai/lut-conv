@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {LutData} from '../dist/lut-conv.mjs';
+import {LutConv, LutData} from '../dist/lut-conv.mjs';
 
 function assertVectorClose(actual, expected, epsilon = 1e-6) {
     assert.equal(actual.length, expected.length);
@@ -53,4 +53,17 @@ test('linear resize preserves an identity LUT across sizes', () => {
             }
         }
     }
+});
+
+test('cube parser accepts standard whitespace and signed exponents', () => {
+    const lut = LutConv.loadCubeStr('LUT_3D_SIZE\t1\n+1e+0\t  .25   -2E-1\n');
+
+    assertVectorClose(lut.data, [1, 0.25, -0.2]);
+});
+
+test('cube parser rejects a file without data instead of scanning forever', () => {
+    assert.throws(
+        () => LutConv.loadCubeStr('LUT_3D_SIZE 2\n# no data\n'),
+        /Error parsing cube data/,
+    );
 });
