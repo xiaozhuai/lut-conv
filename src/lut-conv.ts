@@ -165,6 +165,25 @@ interface LutConvImageInfo {
     depth: number;
 }
 
+function getLutImageGrid(lutImageInfo: LutConvImageInfo): {gWidth: number; gHeight: number} {
+    const {imageWidth, imageHeight, width, height, depth} = lutImageInfo;
+    if (![imageWidth, imageHeight, width, height, depth].every(
+        value => Number.isSafeInteger(value) && value > 0
+    )) {
+        throw new Error("Image and LUT sizes must be positive integers");
+    }
+    if (imageWidth % width !== 0 || imageHeight % height !== 0) {
+        throw new Error("Invalid image size");
+    }
+
+    const gWidth = imageWidth / width;
+    const gHeight = imageHeight / height;
+    if (gWidth * gHeight < depth) {
+        throw new Error("Image does not have enough tiles for LUT depth");
+    }
+    return {gWidth, gHeight};
+}
+
 export class LutConv {
     public static loadCubeStr(cubeStr: string): LutData {
         const NUMBER_PATTERN = '[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[Ee][+-]?\\d+)?';
@@ -235,11 +254,11 @@ export class LutConv {
 
     public static loadLutImageData(imageData: Uint8ClampedArray, lutImageInfo: LutConvImageInfo) {
         const {imageWidth, imageHeight, width, height, depth} = lutImageInfo;
-        if (imageWidth % width !== 0 || imageHeight % height !== 0) {
-            throw new Error("Invalid image size");
+        const {gWidth} = getLutImageGrid(lutImageInfo);
+        const expectedImageDataLength = imageWidth * imageHeight * 4;
+        if (!Number.isSafeInteger(expectedImageDataLength) || imageData.length !== expectedImageDataLength) {
+            throw new Error("Invalid image data length");
         }
-        const gWidth = imageWidth / width;
-        // const gHeight = imageHeight / height;
 
         let lut = new LutData(width, height, depth);
         for (let z = 0; z < depth; z++) {
@@ -263,14 +282,10 @@ export class LutConv {
 
     public static saveLutImageData(lut: LutData, lutImageInfo: LutConvImageInfo): Uint8ClampedArray {
         const {imageWidth, imageHeight, width, height, depth} = lutImageInfo;
-        if (imageWidth % width !== 0 || imageHeight % height !== 0) {
-            throw new Error("Invalid image size");
-        }
+        const {gWidth} = getLutImageGrid(lutImageInfo);
         if (lut.width !== width || lut.height !== height || lut.depth !== depth) {
             throw new Error("Invalid lut size");
         }
-        const gWidth = imageWidth / width;
-        // const gHeight = imageHeight / height;
 
         let imageData = new Uint8ClampedArray(imageWidth * imageHeight * 4);
         for (let z = 0; z < depth; z++) {

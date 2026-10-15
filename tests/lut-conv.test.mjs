@@ -106,3 +106,62 @@ test('cube parser ignores blank and comment lines between values', () => {
 
     assertVectorClose(lut.data, [0, 0, 0]);
 });
+
+test('LUT image conversion rejects a grid with too few tiles', () => {
+    const info = {
+        imageWidth: 2,
+        imageHeight: 2,
+        width: 2,
+        height: 2,
+        depth: 2,
+    };
+
+    assert.throws(
+        () => LutConv.loadLutImageData(new Uint8ClampedArray(16), info),
+        /Image does not have enough tiles for LUT depth/,
+    );
+    assert.throws(
+        () => LutConv.saveLutImageData(new LutData(2, 2, 2), info),
+        /Image does not have enough tiles for LUT depth/,
+    );
+});
+
+test('LUT image loading validates the RGBA buffer length', () => {
+    const info = {
+        imageWidth: 2,
+        imageHeight: 2,
+        width: 2,
+        height: 2,
+        depth: 1,
+    };
+
+    assert.throws(
+        () => LutConv.loadLutImageData(new Uint8ClampedArray(4), info),
+        /Invalid image data length/,
+    );
+    assert.throws(
+        () => LutConv.loadLutImageData(new Uint8ClampedArray(), {...info, width: 0}),
+        /Image and LUT sizes must be positive integers/,
+    );
+});
+
+test('LUT image data round-trips through a valid tile grid', () => {
+    const lut = new LutData(2, 2, 2);
+    for (let i = 0; i < lut.data.length; i++) {
+        lut.data[i] = i / 255;
+    }
+    const info = {
+        imageWidth: 4,
+        imageHeight: 2,
+        width: 2,
+        height: 2,
+        depth: 2,
+    };
+
+    const imageData = LutConv.saveLutImageData(lut, info);
+    for (let i = 3; i < imageData.length; i += 4) {
+        assert.equal(imageData[i], 255);
+    }
+    const loaded = LutConv.loadLutImageData(imageData, info);
+    assertVectorClose(loaded.data, lut.data);
+});
