@@ -8,6 +8,14 @@ function lerp(a: number, b: number, t: number): number {
     return a + t * (b - a);
 }
 
+function isFiniteNumber(value: number): boolean {
+    return typeof value === 'number' && isFinite(value);
+}
+
+function isSafeInteger(value: number): boolean {
+    return isFiniteNumber(value) && Math.floor(value) === value && Math.abs(value) <= 9007199254740991;
+}
+
 export class LutData {
     width: number;
     height: number;
@@ -167,9 +175,7 @@ interface LutConvImageInfo {
 
 function getLutImageGrid(lutImageInfo: LutConvImageInfo): {gWidth: number; gHeight: number} {
     const {imageWidth, imageHeight, width, height, depth} = lutImageInfo;
-    if (![imageWidth, imageHeight, width, height, depth].every(
-        value => Number.isSafeInteger(value) && value > 0
-    )) {
+    if (![imageWidth, imageHeight, width, height, depth].every(value => isSafeInteger(value) && value > 0)) {
         throw new Error("Image and LUT sizes must be positive integers");
     }
     if (imageWidth % width !== 0 || imageHeight % height !== 0) {
@@ -208,14 +214,17 @@ export class LutConv {
 
         const values = lines.slice(index)
             .map((line, offset) => ({line, lineNumber: index + offset + 1}))
-            .filter(({line}) => line.trim() !== '' && !line.trimStart().startsWith('#'))
+            .filter(({line}) => {
+                const trimmedLine = line.trim();
+                return trimmedLine !== '' && trimmedLine.charAt(0) !== '#';
+            })
             .map(({line, lineNumber}) => {
                 const result = REGEX_VALUE.exec(line);
                 if (!result) {
                     throw new Error("Invalid cube data at line " + lineNumber);
                 }
                 const value = [Number(result[1]), Number(result[2]), Number(result[3])];
-                if (!value.every(Number.isFinite)) {
+                if (!value.every(isFiniteNumber)) {
                     throw new Error("Invalid cube data at line " + lineNumber);
                 }
                 return value;
@@ -256,7 +265,7 @@ export class LutConv {
         const {imageWidth, imageHeight, width, height, depth} = lutImageInfo;
         const {gWidth} = getLutImageGrid(lutImageInfo);
         const expectedImageDataLength = imageWidth * imageHeight * 4;
-        if (!Number.isSafeInteger(expectedImageDataLength) || imageData.length !== expectedImageDataLength) {
+        if (!isSafeInteger(expectedImageDataLength) || imageData.length !== expectedImageDataLength) {
             throw new Error("Invalid image data length");
         }
 
