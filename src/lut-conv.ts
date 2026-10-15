@@ -16,6 +16,21 @@ function isSafeInteger(value: number): boolean {
     return isFiniteNumber(value) && Math.floor(value) === value && Math.abs(value) <= 9007199254740991;
 }
 
+function getLutDataIndex(
+    x: number,
+    y: number,
+    z: number,
+    width: number,
+    height: number,
+    depth: number,
+): number {
+    if (![x, y, z].every(isSafeInteger) ||
+        x < 0 || x >= width || y < 0 || y >= height || z < 0 || z >= depth) {
+        throw new Error("Invalid LUT coordinates");
+    }
+    return (z * width * height + y * width + x) * 3;
+}
+
 export class LutData {
     width: number;
     height: number;
@@ -50,7 +65,7 @@ export class LutData {
      * @param z Range [0, depth)
      */
     get(x: number, y: number, z: number): Float32Array {
-        const i = (z * this.width * this.height + y * this.width + x) * 3;
+        const i = getLutDataIndex(x, y, z, this.width, this.height, this.depth);
         return this.data.subarray(i, i + 3);
     }
 
@@ -62,7 +77,10 @@ export class LutData {
      * @param value
      */
     set(x: number, y: number, z: number, value: Float32Array): void {
-        const i = (z * this.width * this.height + y * this.width + x) * 3;
+        if (value.length < 3) {
+            throw new Error("LUT value must contain three components");
+        }
+        const i = getLutDataIndex(x, y, z, this.width, this.height, this.depth);
         this.data[i] = value[0];
         this.data[i + 1] = value[1];
         this.data[i + 2] = value[2];

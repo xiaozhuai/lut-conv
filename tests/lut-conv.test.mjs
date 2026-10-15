@@ -28,6 +28,22 @@ function createIdentityLut(size) {
     return lut;
 }
 
+test('LUT accessors reject invalid coordinates and incomplete values', () => {
+    const lut = new LutData(2, 2, 2);
+
+    for (const coordinates of [[2, 0, 0], [-1, 0, 0], [0.5, 0, 0], [0, 2, 0], [0, 0, 2]]) {
+        assert.throws(() => lut.get(...coordinates), /Invalid LUT coordinates/);
+        assert.throws(
+            () => lut.set(...coordinates, new Float32Array([1, 2, 3])),
+            /Invalid LUT coordinates/,
+        );
+    }
+    assert.throws(
+        () => lut.set(0, 0, 0, new Float32Array([1, 2])),
+        /LUT value must contain three components/,
+    );
+});
+
 test('linear lookup clamps coordinates to the LUT boundary', () => {
     const lut = createIdentityLut(2);
 
