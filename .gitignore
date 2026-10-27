@@ -1,4 +1,5 @@
 /.idea
 /tests/out
 /node_modules
+/dist
 .DS_Store
