@@ -21,6 +21,10 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: latest
       - name: Check Version
         shell: bash
         run: |
@@ -35,5 +39,5 @@ jobs:
           fi
       - name: Publish
         run: |
-          npm install
-          npm publish
+          pnpm install
+          pnpm publish

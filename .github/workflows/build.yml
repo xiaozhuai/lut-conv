@@ -16,7 +16,11 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: latest
       - name: Build
         run: |
-          npm install
-          npm run build
+          pnpm install
+          pnpm run build
