@@ -44,7 +44,7 @@
     "homepage": "https://github.com/xiaozhuai/lut-conv#readme",
     "devDependencies": {
         "@napi-rs/canvas": "^1.0.3",
-        "tsdown": "0.23.1",
+        "tsdown": "0.23.2",
         "typescript": "^5.9.3"
     }
 }
